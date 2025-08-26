@@ -6,7 +6,7 @@ Integrates multiple free APIs: FRED, Census Bureau, BLS, and Zillow Research Dat
 
 import os
 import requests
-import pandas as pd
+# import pandas as pd  # Removed to avoid deployment issues
 from datetime import datetime, timedelta
 import json
 from dotenv import load_dotenv
