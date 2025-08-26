@@ -1,0 +1,3 @@
+# Disable Git LFS for all files
+* -filter -diff -merge
+*.* -filter -diff -merge

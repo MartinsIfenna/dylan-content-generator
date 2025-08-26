@@ -2,13 +2,10 @@
 GIT_LFS_SKIP_SMUDGE = "1"
 
 [phases.setup]
-nixPkgs = ['python39', 'pip', 'git']
+nixPkgs = ['python39', 'pip']
 
 [phases.install]
 cmds = [
-    'git config --global filter.lfs.clean "git-lfs clean -- %f"',
-    'git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"',
-    'git config --global filter.lfs.process "git-lfs filter-process --skip"',
     'python -m pip install --upgrade pip',
     'pip install -r requirements.txt'
 ]
