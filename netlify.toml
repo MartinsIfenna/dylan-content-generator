@@ -1,7 +1,17 @@
-[build]
-  publish = "."
+# This project is a Flask web application
+# Netlify is for static sites - use Railway, Render, or Heroku instead
+# 
+# For Railway deployment:
+# 1. Connect GitHub repo to Railway
+# 2. Set environment variables in Railway dashboard
+# 3. Railway will auto-detect Python and use web_interface.py
+#
+# For Render deployment:
+# 1. Connect GitHub repo to Render
+# 2. Set build command: pip install -r requirements.txt
+# 3. Set start command: python web_interface.py
+# 4. Set environment variables in Render dashboard
 
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+[build]
+  command = "echo 'This is a Flask app - deploy to Railway, Render, or Heroku instead'"
+  publish = "."
