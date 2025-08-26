@@ -7,6 +7,7 @@ from flask import Flask, jsonify
 import os
 
 app = Flask(__name__)
+app.secret_key = 'dylan_content_secret_key_2025'
 
 @app.route('/')
 def home():
