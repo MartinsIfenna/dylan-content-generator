@@ -10,7 +10,6 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 from dylan_content_agent import DylanContentAgent
-from social_media_poster import SocialMediaPoster
 import json
 
 class AutomatedContentPipeline:
@@ -18,19 +17,16 @@ class AutomatedContentPipeline:
     
     def __init__(self):
         self.content_agent = DylanContentAgent()
-        self.social_poster = SocialMediaPoster()
         self.pipeline_config = self.load_pipeline_config()
         
     def load_pipeline_config(self):
         """Load pipeline configuration"""
         return {
-            'auto_post': False,  # Set to True to enable automatic posting
-            'review_required': True,  # Require manual review before posting
-            'platforms': ['linkedin'],  # Default platforms
+            'auto_post': False,  # Disabled - content generation only
+            'review_required': True,  # Manual review before any action
             'daily_schedule': {
                 'content_generation': '08:00',
-                'content_review': '08:30',
-                'posting_time': '09:00'
+                'content_review': '08:30'
             },
             'weekly_schedule': {
                 'long_article_day': 'tuesday',
@@ -137,22 +133,21 @@ class AutomatedContentPipeline:
             platforms = self.pipeline_config['platforms']
         
         try:
-            print(f"📤 Posting content: {Path(filepath).name}")
+            print(f"📋 Content ready for manual review: {Path(filepath).name}")
             
-            # Post to platforms
-            results = self.social_poster.post_content_file(filepath, platforms)
+            # Content is ready for manual review and copying
+            # No automatic posting - user will manually copy content to social platforms
             
             # Update file status
-            self.update_content_status(filepath, 'posted', results)
+            self.update_content_status(filepath, 'ready_for_review', {'status': 'queued_for_manual_review'})
             
-            # Log posting
-            self.log_pipeline_event('content_posted', {
+            # Log content ready
+            self.log_pipeline_event('content_ready', {
                 'filepath': filepath,
-                'platforms': platforms,
-                'results': {p: r.success for p, r in results.items()}
+                'status': 'ready_for_manual_review'
             })
             
-            return results
+            return {'status': 'ready_for_manual_review'}
             
         except Exception as e:
             error_msg = f"Error posting content: {str(e)}"

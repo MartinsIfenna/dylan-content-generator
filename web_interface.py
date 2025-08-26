@@ -14,7 +14,6 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 from dylan_content_agent import DylanContentAgent
-from social_media_poster import SocialMediaPoster
 from automated_content_pipeline import AutomatedContentPipeline
 import threading
 import schedule
@@ -25,7 +24,6 @@ app.secret_key = 'dylan_content_secret_key_2025'
 
 # Initialize components
 content_agent = DylanContentAgent()
-social_poster = SocialMediaPoster()
 pipeline = AutomatedContentPipeline()
 
 # Global scheduler thread
@@ -37,24 +35,16 @@ def dashboard():
     """Main dashboard"""
     # Get system status
     api_status = "Connected" if content_agent.openai_client else "Template Mode"
-    linkedin_status = "Connected" if social_poster.linkedin_token else "Not Connected"
-    twitter_status = "Connected" if all(social_poster.twitter_credentials.values()) else "Not Connected"
     
     # Get recent content
     recent_content = get_recent_content(5)
-    
-    # Get posting stats
-    posting_stats = social_poster.get_posting_stats(30)
     
     # Get queue status
     queue_status = get_queue_status()
     
     return render_template('dashboard.html',
                          api_status=api_status,
-                         linkedin_status=linkedin_status,
-                         twitter_status=twitter_status,
                          recent_content=recent_content,
-                         posting_stats=posting_stats,
                          queue_status=queue_status,
                          scheduler_running=scheduler_running)
 
