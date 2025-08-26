@@ -1,89 +1,144 @@
 # Dylan Steman AI Content Agent 🚀
 
-An AI-powered content generation system that creates daily social media content for Dylan Steman, focusing on commercial real estate (CRE) and multifamily markets.
+🚀 **AI-powered content generation system for commercial real estate professionals**
 
-## 🎯 Features
+An intelligent content creation platform that generates professional, data-driven LinkedIn posts and articles focused on CRE markets, multifamily trends, and investment insights.
 
-- **Daily Content Generation**: Automated creation of LinkedIn posts and articles
-- **CRE Market Focus**: Specialized in multifamily, commercial real estate, and investment insights
-- **Dylan's Voice**: Maintains Dylan's professional, data-driven content style
-- **Flexible Scheduling**: Daily posts, weekly articles, and batch content generation
-- **Content History**: Tracks topics to avoid repetition
-- **Fallback Mode**: Works without API keys using template-based generation
+## ✨ Features
 
-## 📋 Content Types
-
-### Short-Form Posts (150-200 words)
-- Daily LinkedIn posts
-- Market insights and trends
-- Data-driven observations
-- Engagement questions
-- Professional disclaimers
-
-### Long-Form Articles (800-1200 words)
-- Weekly in-depth analysis
-- Market research pieces
-- Executive summaries
-- Sectioned analysis
-- Forward-looking insights
-
-## 🛠 Installation
-
-1. **Clone and Setup**
-   ```bash
-   cd /Users/mac/CascadeProjects/Dylan_Steman_Content
-   pip install -r requirements.txt
-   ```
-
-2. **Configure Environment**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your API keys
-   ```
-
-3. **Required API Keys** (Optional)
-   - OpenAI API key for AI-powered content generation
-   - LinkedIn API for automated posting (future feature)
+- **🤖 AI Content Generation**: Professional CRE content matching Dylan's voice
+- **📊 Real Market Data**: Integration with Federal Reserve, Census Bureau APIs  
+- **🕒 Automated Scheduling**: Daily posts, weekly long-form articles
+- **📱 Web Dashboard**: Easy-to-use interface for content management
+- **🔄 Social Media Integration**: Direct posting to LinkedIn and Twitter
+- **📈 Analytics**: Track content performance and engagement
+- **⚡ Template Fallbacks**: Works without API keys for testing
 
 ## 🚀 Quick Start
 
-### Generate Content Manually
+### 1. Clone & Install
 ```bash
-python dylan_content_agent.py
+git clone https://github.com/YOUR_USERNAME/dylan-content-generator.git
+cd dylan-content-generator
+pip install -r requirements.txt
 ```
 
-### Run Automated Scheduler
+### 2. Configure Environment
 ```bash
-python daily_scheduler.py
+cp .env.example .env
+# Edit .env with your API keys (optional for demo)
 ```
 
-## 📊 Content Strategy
+### 3. Run the Application
+```bash
+python web_interface.py
+```
+Access the dashboard at: **http://localhost:5001**
 
-### Topics Covered
-- **Market Analysis**: Midwest surge, Gateway renaissance, Sun Belt challenges
-- **Investment Insights**: Capital flows, liquidity trends, strategy shifts
-- **Regional Spotlights**: Minneapolis, Chicago, Boston, Miami markets
-- **Industry Trends**: Interest rates, development pipeline, supply-demand
-- **Professional Insights**: Brokerage dynamics, institutional capital
+### 4. Generate Content
+```bash
+python demo.py  # Generate sample content
+```
 
-### Dylan's Content Style
-- ✅ Professional but accessible tone
-- ✅ Data-driven with specific statistics
-- ✅ Cites sources and dates
-- ✅ Ends with engaging questions
-- ✅ Includes professional disclaimers
-- ✅ Focus on actionable insights
+## 🔧 Configuration
+
+### Environment Variables
+```env
+# AI Generation (Optional - has fallback templates)
+OPENAI_API_KEY=your_openai_api_key
+
+# Social Media (Optional)
+LINKEDIN_ACCESS_TOKEN=your_linkedin_token
+TWITTER_API_KEY=your_twitter_api_key
+TWITTER_API_SECRET=your_twitter_api_secret
+TWITTER_ACCESS_TOKEN=your_twitter_access_token
+TWITTER_ACCESS_TOKEN_SECRET=your_twitter_access_token_secret
+```
+
+## 📝 Content Types
+
+| Type | Length | Frequency | Focus |
+|------|--------|-----------|-------|
+| **Short Posts** | 150-200 words | Daily | Market insights, data points |
+| **Long Articles** | 800-1200 words | Weekly | Comprehensive analysis |
+
+## 🏢 Market Coverage
+
+- **Midwest**: Chicago, Minneapolis, Milwaukee
+- **Gateway**: Boston, NYC, San Francisco  
+- **Sun Belt**: Austin, Phoenix, Miami
+- **Topics**: Interest rates, capital flows, development, vacancy trends
+
+## 🏗️ Architecture
+
+```
+├── dylan_content_agent.py          # Core AI content generation
+├── web_interface.py                # Flask web dashboard  
+├── automated_content_pipeline.py   # Automation & scheduling
+├── social_media_poster.py          # Social platform integration
+├── enhanced_market_data_provider.py # Real market data APIs
+├── templates/                      # Web interface templates
+├── content_queue/                  # Generated content storage
+└── static/                         # Web assets
+```
+
+## 📊 Data Sources
+
+- **Federal Reserve Economic Data (FRED)**
+- **U.S. Census Bureau**
+- **Bureau of Labor Statistics** 
+- **Industry Market Reports**
+
+## 🚀 Deployment Options
+
+### Heroku
+```bash
+git push heroku main
+```
+
+### Railway
+```bash
+railway login
+railway deploy
+```
+
+### Render
+Connect your GitHub repo for automatic deployments.
+
+## 📱 Web Interface
+
+The dashboard provides:
+- **Content Generation**: Create posts with custom topics
+- **Queue Management**: Review content before posting
+- **Analytics**: Track performance metrics
+- **Settings**: Configure APIs and automation
+- **Scheduler**: Automated daily/weekly posting
+
+## 🔒 Security
+
+- Environment variables for API keys
+- No hardcoded credentials
+- Professional disclaimers included
+- Source attribution for all data
+
+## 📄 License
+
+Proprietary and confidential.
 
 ## 📁 Project Structure
 
 ```
-Dylan_Steman_Content/
+Dylan_Content_Generator/
 ├── dylan_content_agent.py      # Main AI agent
-├── daily_scheduler.py          # Automated scheduling
+├── web_interface.py            # Flask web dashboard
+├── automated_content_pipeline.py # Automation & scheduling
+├── social_media_poster.py      # Social platform integration
+├── enhanced_market_data_provider.py # Real market data APIs
+├── templates/                  # Web interface templates
+├── content_queue/              # Generated content storage
+├── static/                     # Web assets
 ├── requirements.txt            # Python dependencies
 ├── .env.example               # Configuration template
-├── generated_content/         # Output directory
-├── logs/                      # Generation logs
 └── existing_content/          # Dylan's current content
 ```
 
