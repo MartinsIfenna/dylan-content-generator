@@ -1,2 +1,0 @@
-flask==2.3.3
-serverless-wsgi==0.2.0
