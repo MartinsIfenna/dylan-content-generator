@@ -155,20 +155,14 @@ Target audience: CRE professionals, institutional investors, multifamily operato
         }
         
     def load_market_data(self):
-        """Load current market data and trends from real sources"""
+        """Load current market data for content generation"""
         try:
-            # Get comprehensive market insights from all free APIs
-            self.market_insights = self.market_data_provider.get_market_insights_for_content()
-            
-            # Transform data into usable format for content generation
-            self.market_trends = {
-                'economic_context': self.market_insights.get('economic_context', {}),
-                'regional_markets': self.market_insights.get('regional_markets', {}),
-                'key_metrics': self.market_insights.get('key_metrics', {}),
-                'data_sources': self.market_insights.get('data_sources', [])
+            # Get comprehensive market data including news and reports
+            all_data = self.market_data_provider.get_all_market_data()
+            self.current_market_data = {
+                **all_data,
+                'last_updated': datetime.now().isoformat()
             }
-            
-            # Get content-ready summary
             self.market_summary = self.market_data_provider.get_content_ready_data_summary()
             
             print(f"✅ Loaded real market data from {len(self.market_trends['data_sources'])} sources")

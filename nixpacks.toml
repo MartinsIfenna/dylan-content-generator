@@ -1,11 +1,20 @@
+[variables]
+GIT_LFS_SKIP_SMUDGE = "1"
+
 [phases.setup]
-nixPkgs = ['python39', 'pip']
+nixPkgs = ['python39', 'pip', 'git']
 
 [phases.install]
-cmds = ['python -m pip install --upgrade pip', 'python -m pip install -r requirements.txt']
+cmds = [
+    'git config --global filter.lfs.clean "git-lfs clean -- %f"',
+    'git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"',
+    'git config --global filter.lfs.process "git-lfs filter-process --skip"',
+    'python -m pip install --upgrade pip',
+    'pip install -r requirements.txt'
+]
 
 [phases.build]
-cmds = ['echo "Build phase complete"']
+cmds = ['echo "Build phase - Flask app ready"']
 
 [start]
 cmd = 'python web_interface.py'

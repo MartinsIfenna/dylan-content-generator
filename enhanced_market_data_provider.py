@@ -168,6 +168,74 @@ class EnhancedMarketDataProvider:
         self._cache_data(cache_key, demographics)
         return demographics
     
+    def get_industry_news(self) -> Dict:
+        """Get latest CRE industry news from RSS feeds"""
+        cache_key = 'industry_news'
+        if self._is_cache_valid(cache_key):
+            return self.cache[cache_key]['data']
+        
+        news_data = {}
+        
+        # Industry RSS feeds
+        feeds = {
+            'commercial_observer': 'https://commercialobserver.com/feed/',
+            'bisnow': 'https://www.bisnow.com/rss',
+            'globe_st': 'https://www.globest.com/rss/news/',
+            'rew_online': 'https://www.rew-online.com/feed/'
+        }
+        
+        try:
+            import feedparser
+            
+            for source, feed_url in feeds.items():
+                try:
+                    feed = feedparser.parse(feed_url)
+                    articles = []
+                    
+                    for entry in feed.entries[:5]:  # Latest 5 articles
+                        articles.append({
+                            'title': entry.title,
+                            'link': entry.link,
+                            'published': entry.get('published', ''),
+                            'summary': entry.get('summary', '')[:200] + '...' if entry.get('summary') else ''
+                        })
+                    
+                    if articles:
+                        news_data[source] = {
+                            'source_name': feed.feed.get('title', source),
+                            'articles': articles,
+                            'last_updated': datetime.now().isoformat()
+                        }
+                    
+                    time.sleep(0.5)  # Rate limiting
+                    
+                except Exception as e:
+                    print(f"Error fetching {source}: {e}")
+                    continue
+                    
+        except ImportError:
+            print("feedparser not available - using fallback news data")
+            news_data = self._get_fallback_news()
+        
+        self._cache_data(cache_key, news_data)
+        return news_data
+    
+    def _get_fallback_news(self) -> Dict:
+        """Fallback news data when RSS feeds unavailable"""
+        return {
+            'fallback': {
+                'source_name': 'Market Intelligence',
+                'articles': [
+                    {
+                        'title': 'CRE Market Trends Analysis',
+                        'summary': 'Current commercial real estate market showing mixed signals across sectors...',
+                        'published': datetime.now().strftime('%Y-%m-%d')
+                    }
+                ],
+                'last_updated': datetime.now().isoformat()
+            }
+        }
+
     def get_employment_data(self) -> Dict:
         """Get employment data from Bureau of Labor Statistics"""
         cache_key = 'bls_employment'
@@ -227,6 +295,94 @@ class EnhancedMarketDataProvider:
         
         self._cache_data(cache_key, employment_data)
         return employment_data
+    
+    def get_market_reports(self) -> Dict:
+        """Scrape public market reports and data"""
+        cache_key = 'market_reports'
+        if self._is_cache_valid(cache_key):
+            return self.cache[cache_key]['data']
+        
+        reports_data = {}
+        
+        # Public data sources
+        sources = {
+            'cbre_research': 'https://www.cbre.com/insights/reports',
+            'jll_research': 'https://www.jll.com/en/trends-and-insights/research',
+            'cushman_research': 'https://www.cushmanwakefield.com/en/insights'
+        }
+        
+        try:
+            from bs4 import BeautifulSoup
+            
+            for source, url in sources.items():
+                try:
+                    headers = {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    }
+                    response = requests.get(url, headers=headers, timeout=15)
+                    
+                    if response.status_code == 200:
+                        soup = BeautifulSoup(response.content, 'html.parser')
+                        
+                        # Extract report titles and links (basic scraping)
+                        reports = []
+                        report_elements = soup.find_all(['h2', 'h3', 'h4'], limit=5)
+                        
+                        for element in report_elements:
+                            title = element.get_text(strip=True)
+                            if len(title) > 20 and any(keyword in title.lower() for keyword in 
+                                ['market', 'real estate', 'commercial', 'office', 'retail', 'industrial']):
+                                reports.append({
+                                    'title': title,
+                                    'source': source,
+                                    'extracted_date': datetime.now().strftime('%Y-%m-%d')
+                                })
+                        
+                        if reports:
+                            reports_data[source] = {
+                                'source_name': source.replace('_', ' ').title(),
+                                'reports': reports,
+                                'last_updated': datetime.now().isoformat()
+                            }
+                    
+                    time.sleep(1.0)  # Rate limiting for scraping
+                    
+                except Exception as e:
+                    print(f"Error scraping {source}: {e}")
+                    continue
+                    
+        except ImportError:
+            print("BeautifulSoup not available - using fallback market data")
+            reports_data = self._get_fallback_reports()
+        
+        self._cache_data(cache_key, reports_data)
+        return reports_data
+    
+    def _get_fallback_reports(self) -> Dict:
+        """Fallback market reports when scraping unavailable"""
+        return {
+            'fallback': {
+                'source_name': 'Market Intelligence',
+                'reports': [
+                    {
+                        'title': 'Q4 Commercial Real Estate Market Overview',
+                        'source': 'market_intelligence',
+                        'extracted_date': datetime.now().strftime('%Y-%m-%d')
+                    }
+                ],
+                'last_updated': datetime.now().isoformat()
+            }
+        }
+    
+    def get_all_market_data(self) -> Dict:
+        """Get comprehensive market data from all sources"""
+        return {
+            'economic_indicators': self.get_fred_economic_indicators(),
+            'demographics': self.get_metro_demographics(),
+            'employment': self.get_employment_data(),
+            'industry_news': self.get_industry_news(),
+            'market_reports': self.get_market_reports()
+        }
     
     def get_market_insights_for_content(self, topic: str = None) -> Dict:
         """Get comprehensive market insights formatted for content generation"""
