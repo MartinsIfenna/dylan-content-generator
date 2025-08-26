@@ -4,7 +4,7 @@ Web Interface for Dylan's AI Content Agent
 Easy-to-use dashboard for content generation and management
 """
 
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, send_from_directory
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
 import os
 import json
 from datetime import datetime, timedelta
@@ -13,9 +13,21 @@ from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
-from dylan_content_agent import DylanContentAgent
-from social_media_poster import SocialMediaPoster
-from automated_content_pipeline import AutomatedContentPipeline
+
+# Import with error handling for deployment
+try:
+    from dylan_content_agent import DylanContentAgent
+    from social_media_poster import SocialMediaPoster
+    from automated_content_pipeline import AutomatedContentPipeline
+except ImportError as e:
+    print(f"Warning: Could not import modules: {e}")
+    # Create dummy classes for deployment
+    class DylanContentAgent:
+        def __init__(self): pass
+    class SocialMediaPoster:
+        def __init__(self): pass
+    class AutomatedContentPipeline:
+        def __init__(self): pass
 import threading
 import schedule
 import time
@@ -23,10 +35,16 @@ import time
 app = Flask(__name__)
 app.secret_key = 'dylan_content_secret_key_2025'
 
-# Initialize components
-content_agent = DylanContentAgent()
-social_poster = SocialMediaPoster()
-pipeline = AutomatedContentPipeline()
+# Initialize components with error handling
+try:
+    content_agent = DylanContentAgent()
+    social_poster = SocialMediaPoster()
+    pipeline = AutomatedContentPipeline()
+except Exception as e:
+    print(f"Warning: Could not initialize components: {e}")
+    content_agent = None
+    social_poster = None
+    pipeline = None
 
 # Global scheduler thread
 scheduler_thread = None
@@ -35,8 +53,10 @@ scheduler_running = False
 @app.route('/')
 def dashboard():
     """Main dashboard"""
-    # Get system status
-    api_status = "Connected" if content_agent.openai_client else "Template Mode"
+    # Get system status with error handling
+    api_status = "Template Mode"
+    if content_agent and hasattr(content_agent, 'openai_client'):
+        api_status = "Connected" if content_agent.openai_client else "Template Mode"
     linkedin_status = "Connected" if social_poster.linkedin_token else "Not Connected"
     twitter_status = "Connected" if all(social_poster.twitter_credentials.values()) else "Not Connected"
     
