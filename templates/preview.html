@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Preview Content - Dylan's Content Agent{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-eye me-2"></i>Content Preview
+                </h5>
+                <span class="badge bg-{{ 'success' if item.status == 'posted' else 'warning' }}">
+                    {{ item.status.title() }}
+                </span>
+            </div>
+            <div class="card-body">
+                <h4 class="text-primary mb-3">{{ item.title or 'Untitled Content' }}</h4>
+                
+                <!-- Content Metadata -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <small class="text-muted">Type</small>
+                        <div class="fw-bold">{{ item.type.replace('_', ' ').title() }}</div>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted">Word Count</small>
+                        <div class="fw-bold">{{ item.word_count }} words</div>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted">Topics</small>
+                        <div class="fw-bold">{{ item.topics }}</div>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted">Created</small>
+                        <div class="fw-bold">{{ item.created }}</div>
+                    </div>
+                </div>
+                
+                <!-- Content Body -->
+                <div class="content-preview p-4 mb-4">
+                    {{ item.preview|replace('\n', '<br>')|safe }}
+                </div>
+                
+                <!-- Actions -->
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{{ url_for('content_queue') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Queue
+                    </a>
+                    
+                    {% if item.status == 'queued' %}
+                    <a href="{{ url_for('post_content', filename=filename, platform='linkedin') }}" 
+                       class="btn btn-success"
+                       onclick="return confirm('Post this content to LinkedIn?')">
+                        <i class="fab fa-linkedin me-2"></i>Post to LinkedIn
+                    </a>
+                    {% endif %}
+                    
+                    <button class="btn btn-info" onclick="copyToClipboard()">
+                        <i class="fas fa-copy me-2"></i>Copy Content
+                    </button>
+                    
+                    <a href="{{ url_for('generate_content') }}" class="btn btn-primary">
+                        <i class="fas fa-magic me-2"></i>Generate New
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Content Quality Check -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-check-circle me-2"></i>Quality Check
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        <small>Professional CRE tone</small>
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        <small>Data-driven insights</small>
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        <small>Engagement question included</small>
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        <small>Professional disclaimer</small>
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        <small>Dylan's authentic voice</small>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Posting Guidelines -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-share-alt me-2"></i>Posting Guidelines
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6 class="text-primary">Best Times to Post:</h6>
+                    <ul class="list-unstyled">
+                        <li><small>• 9-11 AM (weekdays)</small></li>
+                        <li><small>• 1-3 PM (weekdays)</small></li>
+                        <li><small>• Tuesday-Thursday optimal</small></li>
+                    </ul>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-primary">Platform Tips:</h6>
+                    <ul class="list-unstyled">
+                        <li><small>• LinkedIn: Professional tone works best</small></li>
+                        <li><small>• Twitter: Consider breaking into thread</small></li>
+                        <li><small>• Add relevant hashtags manually</small></li>
+                    </ul>
+                </div>
+                
+                <div class="alert alert-info">
+                    <small>
+                        <i class="fas fa-lightbulb me-1"></i>
+                        <strong>Tip:</strong> Copy content and add 2-3 relevant CRE hashtags for better reach!
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden textarea for copying -->
+<textarea id="contentText" style="position: absolute; left: -9999px;">{{ item.preview }}</textarea>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function copyToClipboard() {
+        const textArea = document.getElementById('contentText');
+        textArea.select();
+        textArea.setSelectionRange(0, 99999);
+        
+        try {
+            document.execCommand('copy');
+            
+            // Show success message
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check me-2"></i>Copied!';
+            btn.classList.remove('btn-info');
+            btn.classList.add('btn-success');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-info');
+            }, 2000);
+            
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+            alert('Failed to copy content. Please select and copy the text manually.');
+        }
+    }
+</script>
+{% endblock %}

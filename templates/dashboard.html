@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Dylan's Content Agent{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Main Dashboard Content -->
+    <div class="col-lg-8">
+        <!-- Welcome Section -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tachometer-alt me-2"></i>Content Dashboard
+                </h5>
+            </div>
+            <div class="card-body">
+                <h2 class="text-primary">Welcome to Dylan's Content Agent! 🚀</h2>
+                <p class="lead">Your AI-powered content generation system for CRE and multifamily social media.</p>
+                
+                <!-- Quick Actions -->
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <a href="{{ url_for('generate_content') }}" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-magic me-2"></i>
+                            <span class="btn-text">Generate Content</span>
+                            <span class="loading spinner-border spinner-border-sm ms-2"></span>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{{ url_for('content_queue') }}" class="btn btn-success btn-lg w-100">
+                            <i class="fas fa-list me-2"></i>
+                            <span class="btn-text">View Queue ({{ queue_status.pending }})</span>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-warning btn-lg w-100" onclick="generateNow()">
+                            <i class="fas fa-bolt me-2"></i>
+                            <span class="btn-text">Quick Generate</span>
+                            <span class="loading spinner-border spinner-border-sm ms-2"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-heartbeat me-2"></i>System Status
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <div class="status-badge {{ 'status-connected' if api_status == 'Connected' else 'status-template' }}">
+                            <i class="fas fa-brain me-1"></i>
+                            AI Engine: {{ api_status }}
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="status-badge {{ 'status-connected' if linkedin_status == 'Connected' else 'status-disconnected' }}">
+                            <i class="fab fa-linkedin me-1"></i>
+                            LinkedIn: {{ linkedin_status }}
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="status-badge {{ 'status-connected' if twitter_status == 'Connected' else 'status-disconnected' }}">
+                            <i class="fab fa-twitter me-1"></i>
+                            Twitter: {{ twitter_status }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6 text-center">
+                        <div class="status-badge {{ 'status-connected' if scheduler_running else 'status-disconnected' }}">
+                            <i class="fas fa-clock me-1"></i>
+                            Scheduler: {{ 'Running' if scheduler_running else 'Stopped' }}
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <button id="scheduler-btn" class="btn btn-sm {{ 'btn-danger' if scheduler_running else 'btn-success' }}" 
+                                onclick="toggleScheduler()">
+                            <i class="fas {{ 'fa-stop' if scheduler_running else 'fa-play' }} me-1"></i>
+                            {{ 'Stop' if scheduler_running else 'Start' }} Scheduler
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Content -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-history me-2"></i>Recent Content
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if recent_content %}
+                    {% for item in recent_content %}
+                    <div class="content-item content-card mb-3 p-3 border rounded">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">
+                                    <a href="{{ url_for('preview_content', filename=item.filename) }}" 
+                                       class="text-decoration-none text-primary">
+                                        {{ item.title }}
+                                    </a>
+                                </h6>
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>{{ item.created or 'Recently' }}
+                                    <i class="fas fa-tag ms-2 me-1"></i>{{ item.type or 'Content' }}
+                                    <span class="ms-2">{{ item.word_count }} words</span>
+                                </small>
+                            </div>
+                            <span class="badge bg-warning">{{ item.status }}</span>
+                        </div>
+                        <div class="mt-2 mb-0">
+                            <p class="content-preview-text mb-2">{{ item.preview }}</p>
+                            <small class="text-muted">
+                                <i class="fas fa-quote-left me-1"></i>Professional CRE content ready for posting
+                            </small>
+                        </div>
+                        <div class="mt-2">
+                            <a href="{{ url_for('preview_content', filename=item.filename) }}" 
+                               class="btn btn-sm btn-outline-primary me-2">
+                                <i class="fas fa-eye me-1"></i>Read Full Content
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No content generated yet. Start by generating your first piece!</p>
+                        <a href="{{ url_for('generate_content') }}" class="btn btn-primary">
+                            <i class="fas fa-magic me-2"></i>Generate First Content
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Quick Stats -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Quick Stats
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="stats-card">
+                            <div class="stats-number">{{ posting_stats.total_posts or 0 }}</div>
+                            <div class="stats-label">Total Posts</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stats-card">
+                            <div class="stats-number">{{ "%.0f"|format(posting_stats.success_rate or 0) }}%</div>
+                            <div class="stats-label">Success Rate</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="stats-card">
+                            <div class="stats-number">{{ queue_status.pending }}</div>
+                            <div class="stats-label">In Queue</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stats-card">
+                            <div class="stats-number">{{ queue_status.posted }}</div>
+                            <div class="stats-label">Posted</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Topics -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tags me-2"></i>Content Focus Areas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="badge bg-primary">Midwest Markets</span>
+                    <span class="badge bg-primary">Gateway Cities</span>
+                    <span class="badge bg-primary">Multifamily</span>
+                    <span class="badge bg-primary">CRE Investment</span>
+                    <span class="badge bg-primary">Market Analysis</span>
+                    <span class="badge bg-primary">Capital Flows</span>
+                    <span class="badge bg-primary">Interest Rates</span>
+                    <span class="badge bg-primary">Development</span>
+                </div>
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Dylan's content focuses on professional CRE insights with data-driven analysis
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Tips -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>Quick Tips
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <small>Generate content daily for consistent posting</small>
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <small>Review content before posting for quality</small>
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <small>Use scheduler for automated daily workflow</small>
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <small>Monitor analytics for engagement insights</small>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function generateNow() {
+        const button = event.target.closest('button');
+        showLoading(button);
+        
+        fetch('/api/generate_now', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                content_type: 'short_post'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideLoading(button);
+            if (data.status === 'success') {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            hideLoading(button);
+            alert('Error generating content: ' + error);
+        });
+    }
+    
+    function toggleScheduler() {
+        // Get scheduler status from the button's class
+        const button = document.getElementById('scheduler-btn');
+        const isRunning = button.classList.contains('btn-danger');
+        const endpoint = isRunning ? '/api/stop_scheduler' : '/api/start_scheduler';
+        
+        fetch(endpoint, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            location.reload();
+        })
+        .catch(error => {
+            alert('Error toggling scheduler: ' + error);
+        });
+    }
+    
+    function startScheduler() {
+        fetch('/api/start_scheduler', {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            location.reload();
+        })
+        .catch(error => {
+            alert('Error starting scheduler: ' + error);
+        });
+    }
+    
+    function stopScheduler() {
+        fetch('/api/stop_scheduler', {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            location.reload();
+        })
+        .catch(error => {
+            alert('Error stopping scheduler: ' + error);
+        });
+    }
+</script>
+{% endblock %}
