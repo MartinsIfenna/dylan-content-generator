@@ -1,8 +1,6 @@
-# Dylan Steman AI Content Agent 🚀
+# Dylan's AI Content Generator
 
-🚀 **AI-powered content generation system for commercial real estate professionals**
-
-An intelligent content creation platform that generates professional, data-driven LinkedIn posts and articles focused on CRE markets, multifamily trends, and investment insights.
+A comprehensive AI-powered system for generating professional commercial real estate content. This repository contains both a modern web interface and backend Python tools for automated content creation.
 
 ## ✨ Features
 
